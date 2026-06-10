@@ -118,3 +118,838 @@
     </div>
 </body>
 </html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자동차 코너링 안정성 시뮬레이션</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .controls {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #cbd5e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+
+        .value-display .current {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .buttons {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72,187,120,0.4);
+        }
+
+        .btn-reset {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(237,137,54,0.4);
+        }
+
+        .btn-export {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66,153,225,0.4);
+        }
+
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #canvas-container {
+            background: #1a202c;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .status-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-item .label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .status-item .value {
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .status-message {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 700;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .safe {
+            background: rgba(72,187,120,0.3) !important;
+            border: 2px solid #48bb78;
+        }
+
+        .warning {
+            background: rgba(237,137,54,0.3) !important;
+            border: 2px solid #ed8936;
+        }
+
+        .danger {
+            background: rgba(245,101,101,0.3) !important;
+            border: 2px solid #f56565;
+        }
+
+        .data-table {
+            margin-top: 20px;
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .data-table h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #edf2f7;
+        }
+
+        .formula-box {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .formula-box h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #4a5568;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 자동차 코너링 안정성 시뮬레이션</h1>
+        <p class="subtitle">구심력과 마찰력의 관계를 통한 임계 속도 분석</p>
+
+        <div class="main-content">
+            <!-- 제어 패널 -->
+            <div class="controls">
+                <h3 style="margin-bottom: 20px; color: #2d3748;">조작 변인</h3>
+                
+                <div class="control-group">
+                    <label>🏎️ 차량 속도 (v)</label>
+                    <input type="range" id="velocity" min="5" max="35" value="15" step="0.5">
+                    <div class="value-display">
+                        <span>5 m/s</span>
+                        <span class="current" id="velocity-value">15 m/s</span>
+                        <span>35 m/s</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>📏 곡률 반지름 (r)</label>
+                    <input type="range" id="radius" min="20" max="100" value="50" step="5">
+                    <div class="value-display">
+                        <span>20 m</span>
+                        <span class="current" id="radius-value">50 m</span>
+                        <span>100 m</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>🛞 마찰 계수 (μ)</label>
+                    <input type="range" id="friction" min="0.2" max="1.0" value="0.7" step="0.05">
+                    <div class="value-display">
+                        <span>0.2</span>
+                        <span class="current" id="friction-value">0.70</span>
+                        <span>1.0</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>⚖️ 차량 질량 (m)</label>
+                    <input type="range" id="mass" min="500" max="2000" value="1000" step="100">
+                    <div class="value-display">
+                        <span>500 kg</span>
+                        <span class="current" id="mass-value">1000 kg</span>
+                        <span>2000 kg</span>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn-start" onclick="startSimulation()">▶️ 시뮬레이션 시작</button>
+                    <button class="btn-reset" onclick="resetSimulation()">🔄 초기화</button>
+                    <button class="btn-export" onclick="exportData()">📊 데이터 내보내기</button>
+                </div>
+
+                <div class="formula-box">
+                    <h4>📐 핵심 공식</h4>
+                    <div class="formula">F_c = mv²/r</div>
+                    <div class="formula">F_f = μ·m·g</div>
+                    <div class="formula">v_max = √(μ·g·r)</div>
+                </div>
+            </div>
+
+            <!-- 시각화 영역 -->
+            <div class="visualization">
+                <div id="canvas-container">
+                    <canvas id="simulationCanvas" width="800" height="600"></canvas>
+                </div>
+
+                <div class="status-panel">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="label">필요 구심력</div>
+                            <div class="value" id="centripetal-force">0 N</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="label">최대 마찰력</div>
+                            <div class="value" id="max-friction">0 N</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="label">임계 속도</div>
+                            <div class="value" id="critical-velocity">0 m/s</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="label">안전 여유도</div>
+                            <div class="value" id="safety-margin">0%</div>
+                        </div>
+                    </div>
+                    <div class="status-message" id="status-message">
+                        시뮬레이션을 시작하려면 '시작' 버튼을 클릭하세요
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <h3>📈 실험 데이터 로그</h3>
+                    <table id="data-log">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>속도(m/s)</th>
+                                <th>반지름(m)</th>
+                                <th>마찰계수</th>
+                                <th>구심력(N)</th>
+                                <th>마찰력(N)</th>
+                                <th>결과</th>
+                                <th>오차율(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-body">
+                            <tr><td colspan="8" style="text-align: center; color: #a0aec0;">데이터가 없습니다</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 전역 변수 ==========
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+        const g = 9.8; // 중력가속도
+        
+        let velocity = 15;
+        let radius = 50;
+        let friction = 0.7;
+        let mass = 1000;
+        
+        let isRunning = false;
+        let animationId = null;
+        let carAngle = 0;
+        let carX, carY;
+        let centerX = 400;
+        let centerY = 300;
+        let scale = 3; // 픽셀 스케일
+        let experimentCount = 0;
+        let dataLog = [];
+        
+        let isCrashed = false;
+        let crashVelocityX = 0;
+        let crashVelocityY = 0;
+
+        // ========== 이벤트 리스너 ==========
+        document.getElementById('velocity').addEventListener('input', function(e) {
+            velocity = parseFloat(e.target.value);
+            document.getElementById('velocity-value').textContent = velocity.toFixed(1) + ' m/s';
+            updateCalculations();
+        });
+
+        document.getElementById('radius').addEventListener('input', function(e) {
+            radius = parseFloat(e.target.value);
+            document.getElementById('radius-value').textContent = radius + ' m';
+            updateCalculations();
+        });
+
+        document.getElementById('friction').addEventListener('input', function(e) {
+            friction = parseFloat(e.target.value);
+            document.getElementById('friction-value').textContent = friction.toFixed(2);
+            updateCalculations();
+        });
+
+        document.getElementById('mass').addEventListener('input', function(e) {
+            mass = parseFloat(e.target.value);
+            document.getElementById('mass-value').textContent = mass + ' kg';
+            updateCalculations();
+        });
+
+        // ========== 물리 계산 함수 ==========
+        function calculatePhysics() {
+            const centripetalForce = mass * velocity * velocity / radius;
+            const maxFriction = friction * mass * g;
+            const criticalVelocity = Math.sqrt(friction * g * radius);
+            const safetyMargin = ((maxFriction - centripetalForce) / maxFriction) * 100;
+            
+            return {
+                centripetalForce,
+                maxFriction,
+                criticalVelocity,
+                safetyMargin,
+                isSafe: centripetalForce <= maxFriction
+            };
+        }
+
+        function updateCalculations() {
+            if (isRunning) return;
+            
+            const physics = calculatePhysics();
+            
+            document.getElementById('centripetal-force').textContent = 
+                physics.centripetalForce.toFixed(0) + ' N';
+            document.getElementById('max-friction').textContent = 
+                physics.maxFriction.toFixed(0) + ' N';
+            document.getElementById('critical-velocity').textContent = 
+                physics.criticalVelocity.toFixed(2) + ' m/s';
+            document.getElementById('safety-margin').textContent = 
+                physics.safetyMargin.toFixed(1) + '%';
+            
+            updateStatusMessage(physics);
+        }
+
+        function updateStatusMessage(physics) {
+            const msg = document.getElementById('status-message');
+            
+            if (physics.safetyMargin > 20) {
+                msg.textContent = '✅ 안전: 여유 있게 코너를 돌 수 있습니다';
+                msg.className = 'status-message safe';
+            } else if (physics.safetyMargin > 0) {
+                msg.textContent = '⚠️ 주의: 마찰력 한계에 근접했습니다';
+                msg.className = 'status-message warning';
+            } else {
+                msg.textContent = '🚨 위험: 마찰력 초과! 차량이 이탈합니다';
+                msg.className = 'status-message danger';
+            }
+        }
+
+        // ========== 시뮬레이션 제어 ==========
+        function startSimulation() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            isCrashed = false;
+            carAngle = -Math.PI / 2;
+            
+            const physics = calculatePhysics();
+            
+            // 데이터 로그 추가
+            experimentCount++;
+            const errorRate = ((velocity - physics.criticalVelocity) / physics.criticalVelocity * 100).toFixed(2);
+            
+            dataLog.push({
+                no: experimentCount,
+                velocity: velocity.toFixed(1),
+                radius: radius,
+                friction: friction.toFixed(2),
+                centripetalForce: physics.centripetalForce.toFixed(0),
+                maxFriction: physics.maxFriction.toFixed(0),
+                result: physics.isSafe ? '안전' : '이탈',
+                errorRate: errorRate
+            });
+            
+            updateDataTable();
+            animate();
+        }
+
+        function resetSimulation() {
+            isRunning = false;
+            isCrashed = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            carAngle = 0;
+            drawStatic();
+        }
+
+        function animate() {
+            if (!isRunning) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const physics = calculatePhysics();
+            
+            // 배경 그리기
+            drawBackground();
+            
+            // 도로 그리기
+            drawRoad();
+            
+            if (!isCrashed && physics.isSafe) {
+                // 안전한 원운동
+                const angularVelocity = velocity / radius;
+                carAngle += angularVelocity * 0.016; // 60fps 기준
+                
+                carX = centerX + Math.cos(carAngle) * radius * scale;
+                carY = centerY + Math.sin(carAngle) * radius * scale;
+                
+                drawCar(carX, carY, carAngle + Math.PI / 2, '#48bb78');
+                
+            } else if (!isCrashed) {
+                // 충돌 시작
+                isCrashed = true;
+                const tangentAngle = carAngle + Math.PI / 2;
+                crashVelocityX = Math.cos(tangentAngle) * velocity * 0.3;
+                crashVelocityY = Math.sin(tangentAngle) * velocity * 0.3;
+                
+                carX = centerX + Math.cos(carAngle) * radius * scale;
+                carY = centerY + Math.sin(carAngle) * radius * scale;
+            }
+            
+            if (isCrashed) {
+                // 접선 방향으로 튕겨나감
+                carX += crashVelocityX;
+                carY += crashVelocityY;
+                carAngle += 0.1;
+                
+                drawCar(carX, carY, carAngle, '#f56565');
+                
+                // 화면 밖으로 나가면 정지
+                if (carX < 0 || carX > canvas.width || carY < 0 || carY > canvas.height) {
+                    isRunning = false;
+                    return;
+                }
+            }
+            
+            // 힘 벡터 그리기
+            drawForceVectors(physics);
+            
+            // 실시간 그래프
+            drawForceGraph(physics);
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // ========== 그리기 함수 ==========
+        function drawBackground() {
+            // 그라데이션 배경
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 400);
+            gradient.addColorStop(0, '#2d3748');
+            gradient.addColorStop(1, '#1a202c');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 격자
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+        }
+
+        function drawRoad() {
+            // 외곽선
+            ctx.strokeStyle = '#fbd38d';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * scale + 20, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * scale - 20, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // 중앙선 (점선)
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * scale, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 중심점
+            ctx.fillStyle = '#f56565';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawCar(x, y, angle, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            
+            // 차체
+            ctx.fillStyle = color;
+            ctx.fillRect(-15, -10, 30, 20);
+            
+            // 윈드실드
+            ctx.fillStyle = 'rgba(100, 150, 255, 0.7)';
+            ctx.fillRect(-10, -8, 20, 16);
+            
+            // 바퀴
+            ctx.fillStyle = '#2d3748';
+            ctx.fillRect(-15, -12, 8, 4);
+            ctx.fillRect(-15, 8, 8, 4);
+            ctx.fillRect(7, -12, 8, 4);
+            ctx.fillRect(7, 8, 8, 4);
+            
+            ctx.restore();
+        }
+
+        function drawForceVectors(physics) {
+            if (!carX || !carY) return;
+            
+            const vectorScale = 0.3;
+            
+            // 구심력 (중심 방향)
+            const centripetalLength = physics.centripetalForce * vectorScale;
+            const toCenterAngle = Math.atan2(centerY - carY, centerX - carX);
+            
+            ctx.strokeStyle = '#f56565';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(carX, carY);
+            ctx.lineTo(
+                carX + Math.cos(toCenterAngle) * centripetalLength,
+                carY + Math.sin(toCenterAngle) * centripetalLength
+            );
+            ctx.stroke();
+            
+            // 화살표
+            drawArrow(
+                carX + Math.cos(toCenterAngle) * centripetalLength,
+                carY + Math.sin(toCenterAngle) * centripetalLength,
+                toCenterAngle,
+                '#f56565'
+            );
+            
+            // 라벨
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(
+                'F_c=' + physics.centripetalForce.toFixed(0) + 'N',
+                carX + Math.cos(toCenterAngle) * centripetalLength + 10,
+                carY + Math.sin(toCenterAngle) * centripetalLength
+            );
+        }
+
+        function drawArrow(x, y, angle, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-10, -5);
+            ctx.lineTo(-10, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawForceGraph(physics) {
+            const graphX = 50;
+            const graphY = 50;
+            const barWidth = 40;
+            const maxHeight = 150;
+            
+            // 배경
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(graphX - 10, graphY - 10, 200, maxHeight + 60);
+            
+            // 제목
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('힘의 크기 비교', graphX, graphY - 20);
+            
+            // 구심력 바
+            const centripetalHeight = Math.min((physics.centripetalForce / physics.maxFriction) * maxHeight, maxHeight);
+            ctx.fillStyle = '#f56565';
+            ctx.fillRect(graphX, graphY + maxHeight - centripetalHeight, barWidth, centripetalHeight);
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.fillText('구심력', graphX, graphY + maxHeight + 15);
+            ctx.fillText(physics.centripetalForce.toFixed(0) + 'N', graphX - 5, graphY + maxHeight - centripetalHeight - 5);
+            
+            // 마찰력 바
+            ctx.fillStyle = '#48bb78';
+            ctx.fillRect(graphX + 80, graphY, barWidth, maxHeight);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('최대마찰력', graphX + 65, graphY + maxHeight + 15);
+            ctx.fillText(physics.maxFriction.toFixed(0) + 'N', graphX + 75, graphY - 5);
+            
+            // 기준선
+            ctx.strokeStyle = '#fbd38d';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(graphX - 5, graphY + maxHeight);
+            ctx.lineTo(graphX + 125, graphY + maxHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawStatic() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            drawRoad();
+            
+            // 초기 위치에 차 그리기
+            carX = centerX + radius * scale;
+            carY = centerY;
+            drawCar(carX, carY, Math.PI / 2, '#4299e1');
+        }
+
+        // ========== 데이터 테이블 ==========
+        function updateDataTable() {
+            const tbody = document.getElementById('data-body');
+            tbody.innerHTML = '';
+            
+            dataLog.forEach(data => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${data.no}</td>
+                    <td>${data.velocity}</td>
+                    <td>${data.radius}</td>
+                    <td>${data.friction}</td>
+                    <td>${data.centripetalForce}</td>
+                    <td>${data.maxFriction}</td>
+                    <td style="font-weight: bold; color: ${data.result === '안전' ? '#48bb78' : '#f56565'}">${data.result}</td>
+                    <td>${data.errorRate}</td>
+                `;
+            });
+        }
+
+        function exportData() {
+            if (dataLog.length === 0) {
+                alert('내보낼 데이터가 없습니다. 먼저 시뮬레이션을 실행하세요.');
+                return;
+            }
+            
+            let csv = '실험번호,속도(m/s),반지름(m),마찰계수,구심력(N),마찰력(N),결과,오차율(%)\n';
+            
+            dataLog.forEach(data => {
+                csv += `${data.no},${data.velocity},${data.radius},${data.friction},${data.centripetalForce},${data.maxFriction},${data.result},${data.errorRate}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '코너링_시뮬레이션_데이터.csv';
+            link.click();
+        }
+
+        // ========== 초기화 ==========
+        window.onload = function() {
+            updateCalculations();
+            drawStatic();
+        };
+    </script>
+</body>
+</html>
