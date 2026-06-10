@@ -119,6 +119,7 @@
 </body>
 </html>
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -405,6 +406,112 @@
             margin: 5px 0;
         }
 
+        /* 새로 추가된 스타일 */
+        .error-formula-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 3px solid #fc8181;
+            box-shadow: 0 4px 12px rgba(252, 129, 129, 0.2);
+        }
+
+        .error-formula-box h4 {
+            color: #742a2a;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-formula-box .main-formula {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .error-formula-box .main-formula .formula-title {
+            color: #742a2a;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .error-formula-box .main-formula .formula-expression {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8em;
+            color: #c53030;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .error-formula-box .formula-description {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .error-formula-box .formula-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #fc8181;
+        }
+
+        .error-formula-box .formula-item .term {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #c53030;
+            font-size: 1.1em;
+        }
+
+        .error-formula-box .formula-item .description {
+            color: #4a5568;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .error-formula-box .example-box {
+            background: #fffaf0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px dashed #ed8936;
+        }
+
+        .error-formula-box .example-box h5 {
+            color: #744210;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .error-formula-box .example-calculation {
+            font-family: 'Courier New', monospace;
+            color: #2d3748;
+            line-height: 1.8;
+            font-size: 1em;
+        }
+
+        .error-formula-box .example-calculation .step {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        .error-formula-box .example-calculation .result {
+            font-weight: 700;
+            color: #c53030;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -526,6 +633,70 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- ⭐ 새로 추가된 오차율 공식 박스 -->
+                <div class="error-formula-box">
+                    <h4>
+                        <span style="font-size: 1.5em;">📊</span>
+                        오차율 계산 공식
+                    </h4>
+                    
+                    <div class="main-formula">
+                        <div class="formula-title">정량적 오차율 산출식</div>
+                        <div class="formula-expression">
+                            오차율(%) = |v<sub>실험</sub> - v<sub>임계</sub>| / v<sub>임계</sub> × 100
+                        </div>
+                    </div>
+
+                    <div class="formula-description">
+                        <div class="formula-item">
+                            <div class="term">v<sub>실험</sub></div>
+                            <div class="description">시뮬레이션에 입력한 차량 속도 (m/s)</div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="term">v<sub>임계</sub></div>
+                            <div class="description">이론적 임계 속도 = √(μ·g·r)</div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="term">|절댓값|</div>
+                            <div class="description">차이의 절댓값 (양수 변환)</div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="term">× 100</div>
+                            <div class="description">백분율(%) 변환</div>
+                        </div>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>💡 계산 예시</h5>
+                        <div class="example-calculation">
+                            <div class="step">
+                                <strong>주어진 조건:</strong> μ = 0.7, g = 9.8 m/s², r = 50 m, v<sub>실험</sub> = 20 m/s
+                            </div>
+                            <div class="step">
+                                <strong>1단계:</strong> v<sub>임계</sub> = √(0.7 × 9.8 × 50) = √343 = 18.52 m/s
+                            </div>
+                            <div class="step">
+                                <strong>2단계:</strong> 차이 계산 = |20 - 18.52| = 1.48 m/s
+                            </div>
+                            <div class="step">
+                                <strong>3단계:</strong> 오차율 = (1.48 / 18.52) × 100 = 7.99%
+                            </div>
+                            <div class="step">
+                                <span class="result">최종 오차율: 7.99%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="formula-item" style="margin-top: 15px; background: #fff;">
+                        <div style="color: #2d3748; font-size: 0.95em; line-height: 1.6;">
+                            <strong>📌 해석 기준:</strong><br>
+                            • 오차율 0~5%: 매우 정확 (이론과 거의 일치)<br>
+                            • 오차율 5~15%: 허용 범위 (이산화 오차 영향)<br>
+                            • 오차율 15% 이상: 큰 차이 (공기저항 등 미반영 요인)
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -640,7 +811,7 @@
             
             // 데이터 로그 추가
             experimentCount++;
-            const errorRate = ((velocity - physics.criticalVelocity) / physics.criticalVelocity * 100).toFixed(2);
+            const errorRate = ((Math.abs(velocity - physics.criticalVelocity)) / physics.criticalVelocity * 100).toFixed(2);
             
             dataLog.push({
                 no: experimentCount,
