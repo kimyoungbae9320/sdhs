@@ -120,6 +120,31 @@
 </html>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -406,110 +431,85 @@
             margin: 5px 0;
         }
 
-        /* 새로 추가된 스타일 */
-        .error-formula-box {
-            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        /* ========== 수정3: 임계선회속도 비교 패널 ========== */
+        .compare-panel {
+            background: #edf2f7;
             padding: 20px;
             border-radius: 15px;
             margin-top: 20px;
-            border: 3px solid #fc8181;
-            box-shadow: 0 4px 12px rgba(252, 129, 129, 0.2);
+            border: 2px solid #e2e8f0;
         }
 
-        .error-formula-box h4 {
-            color: #742a2a;
+        .compare-panel h3 {
+            color: #2d3748;
             margin-bottom: 15px;
-            font-size: 1.3em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        .error-formula-box .main-formula {
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .compare-box {
             background: white;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
-            margin: 15px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        .error-formula-box .main-formula .formula-title {
-            color: #742a2a;
+        .compare-box .label {
             font-size: 0.9em;
-            font-weight: 600;
-            margin-bottom: 10px;
+            color: #718096;
+            margin-bottom: 8px;
         }
 
-        .error-formula-box .main-formula .formula-expression {
-            font-family: 'Courier New', monospace;
-            font-size: 1.8em;
-            color: #c53030;
+        .compare-box .value {
+            font-size: 2em;
             font-weight: 700;
-            margin: 10px 0;
         }
 
-        .error-formula-box .formula-description {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+        .compare-box.current-speed .value {
+            color: #667eea;
         }
 
-        .error-formula-box .formula-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #fc8181;
+        .compare-box.critical-speed .value {
+            color: #e53e3e;
         }
 
-        .error-formula-box .formula-item .term {
-            font-family: 'Courier New', monospace;
+        .compare-vs {
+            font-size: 1.5em;
             font-weight: 700;
-            color: #c53030;
-            font-size: 1.1em;
+            color: #a0aec0;
         }
 
-        .error-formula-box .formula-item .description {
-            color: #4a5568;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-
-        .error-formula-box .example-box {
-            background: #fffaf0;
+        .compare-result {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 700;
             padding: 15px;
-            border-radius: 10px;
             margin-top: 15px;
-            border: 2px dashed #ed8936;
+            border-radius: 10px;
         }
 
-        .error-formula-box .example-box h5 {
-            color: #744210;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+        .compare-result.safe {
+            background: #c6f6d5;
+            color: #276749;
+            border: 2px solid #48bb78;
         }
 
-        .error-formula-box .example-calculation {
-            font-family: 'Courier New', monospace;
-            color: #2d3748;
-            line-height: 1.8;
-            font-size: 1em;
+        .compare-result.danger {
+            background: #fed7d7;
+            color: #9b2c2c;
+            border: 2px solid #f56565;
+            animation: pulse 1s infinite;
         }
 
-        .error-formula-box .example-calculation .step {
-            margin: 5px 0;
-            padding-left: 20px;
-        }
-
-        .error-formula-box .example-calculation .result {
-            font-weight: 700;
-            color: #c53030;
-            background: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            display: inline-block;
-            margin-top: 5px;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
         }
 
         @media (max-width: 1024px) {
@@ -531,10 +531,11 @@
                 
                 <div class="control-group">
                     <label>🏎️ 차량 속도 (v)</label>
-                    <input type="range" id="velocity" min="5" max="35" value="15" step="0.5">
+                    <!-- 수정2: step="0.5" → step="0.1" -->
+                    <input type="range" id="velocity" min="5" max="35" value="15" step="0.1">
                     <div class="value-display">
                         <span>5 m/s</span>
-                        <span class="current" id="velocity-value">15 m/s</span>
+                        <span class="current" id="velocity-value">15.0 m/s</span>
                         <span>35 m/s</span>
                     </div>
                 </div>
@@ -600,7 +601,7 @@
                             <div class="value" id="max-friction">0 N</div>
                         </div>
                         <div class="status-item">
-                            <div class="label">임계 속도</div>
+                            <div class="label">임계 선회 속도</div>
                             <div class="value" id="critical-velocity">0 m/s</div>
                         </div>
                         <div class="status-item">
@@ -613,6 +614,26 @@
                     </div>
                 </div>
 
+                <!-- 수정3: 현재속도 vs 임계선회속도 비교 패널 -->
+                <div class="compare-panel">
+                    <h3>⚡ 현재 속도 vs 임계 선회 속도</h3>
+                    <div class="compare-grid">
+                        <div class="compare-box current-speed">
+                            <div class="label">현재 주행 속도 (v)</div>
+                            <div class="value" id="compare-current">15.0 m/s</div>
+                        </div>
+                        <div class="compare-vs" id="compare-vs">vs</div>
+                        <div class="compare-box critical-speed">
+                            <div class="label">임계 선회 속도 (v_max)</div>
+                            <div class="value" id="compare-critical">18.52 m/s</div>
+                        </div>
+                    </div>
+                    <div class="compare-result safe" id="compare-result">
+                        ✅ v ≤ v_max : 안전하게 코너링 가능
+                    </div>
+                </div>
+
+                <!-- 수정3: 데이터 테이블 - 오차율 열 삭제 -->
                 <div class="data-table">
                     <h3>📈 실험 데이터 로그</h3>
                     <table id="data-log">
@@ -620,82 +641,18 @@
                             <tr>
                                 <th>#</th>
                                 <th>속도(m/s)</th>
+                                <th>임계속도(m/s)</th>
                                 <th>반지름(m)</th>
                                 <th>마찰계수</th>
                                 <th>구심력(N)</th>
                                 <th>마찰력(N)</th>
                                 <th>결과</th>
-                                <th>오차율(%)</th>
                             </tr>
                         </thead>
                         <tbody id="data-body">
                             <tr><td colspan="8" style="text-align: center; color: #a0aec0;">데이터가 없습니다</td></tr>
                         </tbody>
                     </table>
-                </div>
-
-                <!-- ⭐ 새로 추가된 오차율 공식 박스 -->
-                <div class="error-formula-box">
-                    <h4>
-                        <span style="font-size: 1.5em;">📊</span>
-                        오차율 계산 공식
-                    </h4>
-                    
-                    <div class="main-formula">
-                        <div class="formula-title">정량적 오차율 산출식</div>
-                        <div class="formula-expression">
-                            오차율(%) = |v<sub>실험</sub> - v<sub>임계</sub>| / v<sub>임계</sub> × 100
-                        </div>
-                    </div>
-
-                    <div class="formula-description">
-                        <div class="formula-item">
-                            <div class="term">v<sub>실험</sub></div>
-                            <div class="description">시뮬레이션에 입력한 차량 속도 (m/s)</div>
-                        </div>
-                        <div class="formula-item">
-                            <div class="term">v<sub>임계</sub></div>
-                            <div class="description">이론적 임계 속도 = √(μ·g·r)</div>
-                        </div>
-                        <div class="formula-item">
-                            <div class="term">|절댓값|</div>
-                            <div class="description">차이의 절댓값 (양수 변환)</div>
-                        </div>
-                        <div class="formula-item">
-                            <div class="term">× 100</div>
-                            <div class="description">백분율(%) 변환</div>
-                        </div>
-                    </div>
-
-                    <div class="example-box">
-                        <h5>💡 계산 예시</h5>
-                        <div class="example-calculation">
-                            <div class="step">
-                                <strong>주어진 조건:</strong> μ = 0.7, g = 9.8 m/s², r = 50 m, v<sub>실험</sub> = 20 m/s
-                            </div>
-                            <div class="step">
-                                <strong>1단계:</strong> v<sub>임계</sub> = √(0.7 × 9.8 × 50) = √343 = 18.52 m/s
-                            </div>
-                            <div class="step">
-                                <strong>2단계:</strong> 차이 계산 = |20 - 18.52| = 1.48 m/s
-                            </div>
-                            <div class="step">
-                                <strong>3단계:</strong> 오차율 = (1.48 / 18.52) × 100 = 7.99%
-                            </div>
-                            <div class="step">
-                                <span class="result">최종 오차율: 7.99%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="formula-item" style="margin-top: 15px; background: #fff;">
-                        <div style="color: #2d3748; font-size: 0.95em; line-height: 1.6;">
-                            <strong>📌 해석 기준:</strong><br>
-                            • 오차율 0~5%: 매우 정확 (이론과 거의 일치)<br>
-                            • 오차율 5~15%: 허용 범위 (이산화 오차 영향)<br>
-                            • 오차율 15% 이상: 큰 차이 (공기저항 등 미반영 요인)
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -726,9 +683,19 @@
         let crashVelocityX = 0;
         let crashVelocityY = 0;
 
+        // ========== 수정1: 폭발 관련 전역 변수 ==========
+        // particles 배열: 폭발 파티클 객체를 저장
+        // 각 파티클은 {x, y, vx, vy, radius, color, life} 속성 가짐
+        let particles = [];
+        // isExploding: 현재 폭발 애니메이션 재생 중인지 여부
+        let isExploding = false;
+        // explosionFrame: 폭발 애니메이션 프레임 카운터 (진행도 추적)
+        let explosionFrame = 0;
+
         // ========== 이벤트 리스너 ==========
         document.getElementById('velocity').addEventListener('input', function(e) {
             velocity = parseFloat(e.target.value);
+            // 수정2: 소수점 1자리 표시
             document.getElementById('velocity-value').textContent = velocity.toFixed(1) + ' m/s';
             updateCalculations();
         });
@@ -753,9 +720,13 @@
 
         // ========== 물리 계산 함수 ==========
         function calculatePhysics() {
+            // 구심력: Fc = mv²/r
             const centripetalForce = mass * velocity * velocity / radius;
+            // 최대 마찰력: f_max = μ·m·g
             const maxFriction = friction * mass * g;
+            // 임계 선회 속도: v_max = √(μ·g·r)
             const criticalVelocity = Math.sqrt(friction * g * radius);
+            // 안전 여유도: 마찰력이 구심력보다 얼마나 여유있는지 (%)
             const safetyMargin = ((maxFriction - centripetalForce) / maxFriction) * 100;
             
             return {
@@ -763,6 +734,7 @@
                 maxFriction,
                 criticalVelocity,
                 safetyMargin,
+                // 구심력 ≤ 최대 마찰력이면 안전
                 isSafe: centripetalForce <= maxFriction
             };
         }
@@ -782,6 +754,8 @@
                 physics.safetyMargin.toFixed(1) + '%';
             
             updateStatusMessage(physics);
+            // 수정3: 비교 패널 업데이트
+            updateComparePanel(physics);
         }
 
         function updateStatusMessage(physics) {
@@ -799,29 +773,131 @@
             }
         }
 
+        // ========== 수정3: 비교 패널 업데이트 함수 ==========
+        // 현재 속도와 임계 선회 속도를 실시간으로 비교하여 표시
+        function updateComparePanel(physics) {
+            document.getElementById('compare-current').textContent = velocity.toFixed(1) + ' m/s';
+            document.getElementById('compare-critical').textContent = physics.criticalVelocity.toFixed(2) + ' m/s';
+            
+            const result = document.getElementById('compare-result');
+            
+            if (physics.isSafe) {
+                // 현재속도 ≤ 임계속도 → 안전
+                const gap = (physics.criticalVelocity - velocity).toFixed(1);
+                result.className = 'compare-result safe';
+                result.textContent = `✅ v (${velocity.toFixed(1)}) ≤ v_max (${physics.criticalVelocity.toFixed(1)}) : 안전하게 코너링 가능 (여유: ${gap} m/s)`;
+            } else {
+                // 현재속도 > 임계속도 → 이탈
+                const exceed = (velocity - physics.criticalVelocity).toFixed(1);
+                result.className = 'compare-result danger';
+                result.textContent = `🚨 v (${velocity.toFixed(1)}) > v_max (${physics.criticalVelocity.toFixed(1)}) : 임계 속도 초과! 차량 이탈 (+${exceed} m/s)`;
+            }
+        }
+
+        // ========== 수정1: 폭발 파티클 생성 함수 ==========
+        // 설명: 차량이 화면 경계에 충돌했을 때 호출됨
+        //       80개의 파티클을 생성하여 사방으로 퍼뜨림
+        function createExplosion(x, y) {
+            particles = [];
+            const particleCount = 80;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: x,                                    // 시작 x좌표 (충돌 지점)
+                    y: y,                                    // 시작 y좌표 (충돌 지점)
+                    vx: (Math.random() - 0.5) * 20,          // x방향 속도 (랜덤, -10 ~ +10)
+                    vy: (Math.random() - 0.5) * 20,          // y방향 속도 (랜덤, -10 ~ +10)
+                    radius: Math.random() * 10 + 3,          // 반지름 (3 ~ 13 랜덤)
+                    color: ['#f56565','#ed8936','#fbd38d','#fc8181','#feb2b2'][Math.floor(Math.random() * 5)],
+                    life: 1.0                                // 수명 (1.0 → 0.0으로 감소)
+                });
+            }
+        }
+
+        // ========== 수정1: 폭발 파티클 업데이트 + 그리기 함수 ==========
+        // 설명: 매 프레임마다 호출되어 파티클을 이동시키고 그림
+        function updateAndDrawExplosion() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                
+                // 파티클 이동
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.5;      // 중력 효과 (아래로 가속)
+                p.life -= 0.015;   // 수명 감소
+                p.radius *= 0.97;  // 크기 서서히 줄어듦
+                
+                // 파티클 그리기 (투명도 = 수명)
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.max(0.5, p.radius), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                
+                // 수명이 다한 파티클 제거
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            // 폭발 순간 하얀 플래시 효과 (처음 8프레임 동안)
+            if (explosionFrame < 8) {
+                ctx.save();
+                ctx.globalAlpha = 0.6 - explosionFrame * 0.075;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(carX, carY, 120 + explosionFrame * 25, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            
+            // "BOOM!" 텍스트 (처음 40프레임 동안 표시)
+            if (explosionFrame < 40) {
+                ctx.save();
+                ctx.font = 'bold 56px Arial';
+                ctx.fillStyle = '#f56565';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 4;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // 크기 진동 효과
+                const s = 1 + Math.sin(explosionFrame * 0.2) * 0.25;
+                ctx.translate(carX, carY - 80);
+                ctx.scale(s, s);
+                ctx.strokeText('💥 BOOM! 💥', 0, 0);
+                ctx.fillText('💥 BOOM! 💥', 0, 0);
+                ctx.restore();
+            }
+        }
+
         // ========== 시뮬레이션 제어 ==========
         function startSimulation() {
             if (isRunning) return;
             
             isRunning = true;
             isCrashed = false;
+            // 수정1: 폭발 상태 초기화
+            isExploding = false;
+            explosionFrame = 0;
+            particles = [];
+            
             carAngle = -Math.PI / 2;
             
             const physics = calculatePhysics();
             
             // 데이터 로그 추가
             experimentCount++;
-            const errorRate = ((Math.abs(velocity - physics.criticalVelocity)) / physics.criticalVelocity * 100).toFixed(2);
             
             dataLog.push({
                 no: experimentCount,
                 velocity: velocity.toFixed(1),
+                criticalVelocity: physics.criticalVelocity.toFixed(2),
                 radius: radius,
                 friction: friction.toFixed(2),
                 centripetalForce: physics.centripetalForce.toFixed(0),
                 maxFriction: physics.maxFriction.toFixed(0),
-                result: physics.isSafe ? '안전' : '이탈',
-                errorRate: errorRate
+                result: physics.isSafe ? '안전' : '이탈'
             });
             
             updateDataTable();
@@ -831,6 +907,11 @@
         function resetSimulation() {
             isRunning = false;
             isCrashed = false;
+            // 수정1: 폭발 상태 초기화
+            isExploding = false;
+            explosionFrame = 0;
+            particles = [];
+            
             if (animationId) {
                 cancelAnimationFrame(animationId);
             }
@@ -850,6 +931,21 @@
             
             // 도로 그리기
             drawRoad();
+
+            // ========== 수정1: 폭발 중이면 폭발 애니메이션만 그리고 종료 ==========
+            if (isExploding) {
+                explosionFrame++;
+                updateAndDrawExplosion();
+                
+                // 파티클이 모두 사라지면 시뮬레이션 종료
+                if (particles.length === 0 && explosionFrame > 40) {
+                    isRunning = false;
+                    return;
+                }
+                
+                animationId = requestAnimationFrame(animate);
+                return;
+            }
             
             if (!isCrashed && physics.isSafe) {
                 // 안전한 원운동
@@ -862,7 +958,7 @@
                 drawCar(carX, carY, carAngle + Math.PI / 2, '#48bb78');
                 
             } else if (!isCrashed) {
-                // 충돌 시작
+                // 충돌 시작 → 이탈 속도 계산
                 isCrashed = true;
                 const tangentAngle = carAngle + Math.PI / 2;
                 crashVelocityX = Math.cos(tangentAngle) * velocity * 0.3;
@@ -873,17 +969,24 @@
             }
             
             if (isCrashed) {
-                // 접선 방향으로 튕겨나감
+                // 접선 방향으로 이탈
                 carX += crashVelocityX;
                 carY += crashVelocityY;
                 carAngle += 0.1;
                 
                 drawCar(carX, carY, carAngle, '#f56565');
                 
-                // 화면 밖으로 나가면 정지
+                // ========== 수정1: 화면 경계 충돌 감지 → 폭발 시작 ==========
+                // 설명: 차량의 x,y 좌표가 canvas의 경계를 벗어나면
+                //       폭발 파티클을 생성하고 isExploding을 true로 전환
                 if (carX < 0 || carX > canvas.width || carY < 0 || carY > canvas.height) {
-                    isRunning = false;
-                    return;
+                    // 화면 경계에 클램프 (정확한 경계 위치에서 폭발)
+                    carX = Math.max(0, Math.min(canvas.width, carX));
+                    carY = Math.max(0, Math.min(canvas.height, carY));
+                    
+                    isExploding = true;
+                    explosionFrame = 0;
+                    createExplosion(carX, carY);
                 }
             }
             
@@ -1077,7 +1180,7 @@
             drawCar(carX, carY, Math.PI / 2, '#4299e1');
         }
 
-        // ========== 데이터 테이블 ==========
+        // ========== 수정3: 데이터 테이블 - 오차율 열 삭제, 임계속도 열 추가 ==========
         function updateDataTable() {
             const tbody = document.getElementById('data-body');
             tbody.innerHTML = '';
@@ -1087,26 +1190,27 @@
                 row.innerHTML = `
                     <td>${data.no}</td>
                     <td>${data.velocity}</td>
+                    <td>${data.criticalVelocity}</td>
                     <td>${data.radius}</td>
                     <td>${data.friction}</td>
                     <td>${data.centripetalForce}</td>
                     <td>${data.maxFriction}</td>
                     <td style="font-weight: bold; color: ${data.result === '안전' ? '#48bb78' : '#f56565'}">${data.result}</td>
-                    <td>${data.errorRate}</td>
                 `;
             });
         }
 
+        // ========== 수정3: CSV 내보내기에서도 오차율 제거 ==========
         function exportData() {
             if (dataLog.length === 0) {
                 alert('내보낼 데이터가 없습니다. 먼저 시뮬레이션을 실행하세요.');
                 return;
             }
             
-            let csv = '실험번호,속도(m/s),반지름(m),마찰계수,구심력(N),마찰력(N),결과,오차율(%)\n';
+            let csv = '실험번호,속도(m/s),임계속도(m/s),반지름(m),마찰계수,구심력(N),마찰력(N),결과\n';
             
             dataLog.forEach(data => {
-                csv += `${data.no},${data.velocity},${data.radius},${data.friction},${data.centripetalForce},${data.maxFriction},${data.result},${data.errorRate}\n`;
+                csv += `${data.no},${data.velocity},${data.criticalVelocity},${data.radius},${data.friction},${data.centripetalForce},${data.maxFriction},${data.result}\n`;
             });
             
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
